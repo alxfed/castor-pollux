@@ -75,7 +75,8 @@ garbage = [
 #         print(f"Unable to generate continuations response, {e}")
 #         return None
 
-def gemini_continue(contents: List, recorder=None, **kwargs):
+
+def gemini_continue(contents, recorder=None, **kwargs):
 
     """A completions endpoint call through requests.
         kwargs:
@@ -93,8 +94,7 @@ def gemini_continue(contents: List, recorder=None, **kwargs):
     # VERBOSE       Verbose style including extra details. The response may be formatted as a sentence,
     #               paragraph, multiple paragraphs, or bullet points, etc.
     json_data = {"contents": contents,
-                 "safetySettings":  garbage,
-                 "temperature":     kwargs.get("temperature", 0.5)
+                 "safetySettings":  garbage
             }
     try:
 
@@ -148,6 +148,8 @@ def gemini_continue(contents: List, recorder=None, **kwargs):
 
 
 if __name__ == '__main__':
-    question = ['What is the capital of the USA?']
+    question = [{
+    "parts":[{"text": 'What is the capital of the USA?'}]
+    }]
     result = gemini_continue(question)
     print(result)

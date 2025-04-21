@@ -1,10 +1,10 @@
-# Package name
+# castor-pollux
 Package Name
 <pre>
-  pip install independent-machine
+  pip install castor-pollux
 </pre>
 Then:
 ```Python
   # Python
-  import independent_machine
+  import castor_pollux
 ```

@@ -94,6 +94,7 @@ def gemini_continue(contents, instruction, recorder=None, **kwargs):
     # VERBOSE       Verbose style including extra details. The response may be formatted as a sentence,
     #               paragraph, multiple paragraphs, or bullet points, etc.
     generation_config = {
+        # 'systemInstruction': instruction,
         "stopSequences": ['STOP'],
         "responseMimeType": 'text/plain',
         # "responseSchema": {},
@@ -175,8 +176,12 @@ def gemini_continue(contents, instruction, recorder=None, **kwargs):
 
 
 if __name__ == '__main__':
+    '''
+    gemini-2.5-flash
+    '''
+    instruction = {'parts': [{'text': 'You are an eloquent assistant'}], 'role': 'user'}
     question = [{
-    "parts":[{"text": 'What is the capital of the USA?'}]
+    "parts":[{"text": "In one sentence, who was Gerhard Gentzen?"}]
     }]
-    result = gemini_continue(question)
+    result = gemini_continue(question, instruction)
     print(result)

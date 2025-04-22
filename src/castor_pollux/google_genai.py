@@ -120,7 +120,7 @@ def genai_get_chat_session(client, **kwargs):
         'history': kwargs.get('history', None)
     }
     try:
-        chat_session = client.chats.create(**chat_kwargs)
+        chat_session = client.chats.continuation(**chat_kwargs)
     except Exception as e:
         print("could not get chat session.")
     return chat_session

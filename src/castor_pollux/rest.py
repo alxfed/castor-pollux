@@ -120,7 +120,9 @@ def embed(input_list, **kwargs):
 
 if __name__ == '__main__':
     '''
-    ['gemini-2.5-flash-preview-04-17', 'gemini-2.5-pro-exp-03-25', 'gemini-1.5-flash-latest','gemini-2.0-flash-lite','gemini-2.0-flash','gemini-2.0-pro-exp-02-05','gemini-2.0-flash-thinking-exp-01-21']
+    ['gemini-2.5-flash-preview-04-17', 'gemini-2.5-pro-exp-03-25', 'gemini-1.5-flash-latest',
+    'gemini-2.0-flash-lite','gemini-2.0-flash','gemini-2.0-pro-exp-02-05',
+    'gemini-2.0-flash-thinking-exp-01-21']
     '''
     kwa = {'model': 'gemini-2.5-flash-preview-04-17', 'n':2}
     instruction = 'You are an eloquent assistant'

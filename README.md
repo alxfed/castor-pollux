@@ -13,5 +13,5 @@ Castor-Pollux (the twin sons of Zeus, routinely called 'gemini') is a pure REST 
 Then:
 ```Python
   # Python
-  import castor_pollux.rest
+  import castor_pollux.rest as cp
 ```

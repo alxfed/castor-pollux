@@ -76,7 +76,7 @@ garbage = [
 #         return None
 
 
-def gemini_continue(contents, recorder=None, **kwargs):
+def gemini_continue(contents, instruction, recorder=None, **kwargs):
 
     """A completions endpoint call through requests.
         kwargs:
@@ -93,11 +93,38 @@ def gemini_continue(contents, recorder=None, **kwargs):
     # EXTRACTIVE	Very brief and extractive style.
     # VERBOSE       Verbose style including extra details. The response may be formatted as a sentence,
     #               paragraph, multiple paragraphs, or bullet points, etc.
-    json_data = {"contents": contents,
-                 "safetySettings":  garbage
-            }
+    generation_config = {
+        "stopSequences": ['STOP'],
+        "responseMimeType": 'text/plain',
+        # "responseSchema": {},
+        "responseModalities": ['TEXT'],
+        "candidateCount": 1,
+        "maxOutputTokens": 1024,
+        "temperature": 0.5,
+        "topP": 0.9,
+        "topK": 10,
+        "seed": 246,  
+        # "presencePenalty": number,
+        # "frequencyPenalty": number,
+        # "responseLogprobs": boolean,
+        # "logprobs": integer,
+        # "enableEnhancedCivicAnswers": boolean,
+        # "speechConfig": {
+        #     object (SpeechConfig)
+        # },
+        "thinkingConfig": {
+            'includeThoughts': True,
+            'thinkingBudget': 24576
+        }
+    }
+    json_data = {
+        'systemInstruction': instruction,
+        'contents': contents,
+        'safetySettings':  garbage,
+        'generationConfig': generation_config,
+        # 'cachedContent': ''
+    }
     try:
-
         response = requests.post(
             url=f"{gemini_api_base}/models/{kwargs.get('model', gemini_content_model)}:generateContent",
             params=f"key={gemini_key}",

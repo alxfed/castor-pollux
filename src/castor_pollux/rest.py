@@ -22,58 +22,6 @@ garbage = [
     {'category':'HARM_CATEGORY_CIVIC_INTEGRITY', 'threshold': 'BLOCK_NONE'}
 ]
 
-# def gemini_message(messages: List,
-#                    recorder=None,
-#                    **kwargs):
-
-#     """A completions endpoint call through requests.
-#         kwargs:
-#             temperature     = 0 to 1.0
-#             top_p           = 0.0 to 1.0
-#             top_k           = The maximum number of tokens to consider when sampling.
-#             n               = 1 mandatory
-#             max_tokens      = number of tokens
-#             stop            = ['stop']  array of up to 4 sequences
-#     """
-#     record, formatted_messages = prepared_gem_messages(kwargs.get('messages', messages))
-#     json_data = {
-#                  'contents':            formatted_messages,
-#                  'safetySettings':      garbage,
-#                  'generationConfig':{
-#                      'stopSequences':   kwargs.get('stop_sequences', ['STOP','Title']),
-#                      'temperature':     kwargs.get('temperature', 0.5),
-#                      'maxOutputTokens': kwargs.get('max_tokens', 100),
-#                      'candidateCount':  kwargs.get('n', 1),  # mandatory 1
-#                      'topP':            kwargs.get('top_p', 0.9),
-#                      'topK':            kwargs.get('top_k', None)
-#                  }
-#             }
-#     try:
-#         response = requests.post(
-#             url=f'{gemini_api_base}/models/{kwargs.get('model', gemini_content_model)}:generateContent',
-#             params=f'key={gemini_key}',
-#             json=json_data,
-#         )
-#         if response.status_code == requests.codes.ok:
-#             if response.json().get('filters', None):
-#                 raise Exception('Results filtered')
-#             else:
-#                 msg_dump = response.json()
-#                 if recorder:
-#                     log_message = {'query': json_data, 'response': msg_dump}
-#                     recorder.log_event(log_message)
-#         else:
-#             print(f'Request status code: {response.status_code}')
-#             return None
-#         formatted = formatted_gem_output(msg_dump)
-#         if recorder:
-#             rec = {'messages': record,'response': formatted}
-#             recorder.record(rec)
-#             return formatted
-#     except Exception as e:
-#         print(f'Unable to generate continuations response, {e}')
-#         return None
-
 
 def continuation(text=None, contents=None, instruction=None, recorder=None, **kwargs):
     """A completions endpoint call.
@@ -86,7 +34,7 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
             stop            = ['stop']  array of up to 4 sequences
     """
     instruction         = kwargs.get('system_instruction', instruction)
-    system_instruction  = {'parts': [{'text': instruction}], 'role': 'user'} if instruction else None
+    system_instruction  = {'parts': [{'text': instruction}]} if instruction else None
     contents            = kwargs.get('contents', contents)
 
     # Create a structure that the idiots want.
@@ -114,7 +62,7 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
                 'includeThoughts': True,
                 'thinkingBudget': 24576
                 }
-        # 'cachedContent': '',
+            #'cachedContent': '',
         },
     }
     try:
@@ -124,25 +72,25 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
             json=json_data,
         )
         if response.status_code == requests.codes.ok:
-            if response.json().get('filters', None):
+            answer = response.json()
+            if answer.get('filters', None):
                 raise Exception('Results filtered')
             else:
-                answer_dump = response.json()
-            #     if recorder:
-            #         log_message = {'query': json_data, 'response': answer_dump}
-            #         recorder.log_event(log_message)
+                if recorder:
+                    log_message = {'query': json_data, 'response': answer}
+                    recorder.log_event(log_message)
         else:
             print(f'Request status code: {response.status_code}')
             return None
-        # if recorder:
-        #     rec = {'messages': json_data['contents'], 'response': answer_dump['candidates']}
-        #     recorder.record(rec)
+        if recorder:
+            rec = {'messages': json_data['contents'], 'response': answer['candidates']}
+            recorder.record(rec)
 
     except Exception as e:
         print(f'Unable to generate continuation of the text, {e}')
         return None
 
-    return answer_dump
+    return [candidate['content']['parts'][0]['text'] for candidate in answer['candidates']]
 
 
 def embed(input_list, **kwargs):

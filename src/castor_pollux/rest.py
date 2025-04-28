@@ -74,7 +74,7 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
 
     # if there is a recorded previous conversation
     if recorder and not contents:
-        contents = recorder.log
+        contents = recorder.log.copy()
 
     # Create a structure that the idiots want.
     human = dict(role='user', parts=[dict(text=text)])

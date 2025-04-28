@@ -30,7 +30,7 @@ def decode_one(human, response, recorder=None):
     if recorder:
         machine = dict(role='model', parts=[dict(text=answer)])
         events = [human, machine]
-        recorder.log_many(events)
+        recorder.log_it(events)
         initial_text = human['parts'][0]['text']
         records = [dict(Human=initial_text), dict(machine=answer)]
         recorder.record_many(records)
@@ -50,7 +50,7 @@ def decode_many(human, response, recorder=None):
     if recorder:
         machine = dict(role='model', parts=[dict(text=answers[0])])
         events = [human, machine]
-        recorder.log_many(events)
+        recorder.log_it(events)
         initial_text = human['parts'][0]['text']
         records = [dict(Human=initial_text), dict(machine=answers)]
         recorder.record_many(records)

@@ -24,7 +24,7 @@ garbage = [
 
 
 def decode_one(human, response, recorder=None):
-    if response['candidates'][0]['content']['finishReason'] == 'SAFETY':
+    if response['candidates'][0]['finishReason'] == 'SAFETY':
         raise Exception('Result censored by Google.')
     answer = response['candidates'][0]['content']['parts'][0]['text']
     if recorder:
@@ -41,7 +41,7 @@ def decode_many(human, response, recorder=None):
     candidates = response['candidates']
     answers = []
     for candidate in candidates:
-        if candidate['content']['finishReason'] == 'SAFETY':
+        if candidate['finishReason'] == 'SAFETY':
             text = 'Answer censored by Google.'
         else:
             text = candidate['content']['parts'][0]['text']

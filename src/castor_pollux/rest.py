@@ -33,7 +33,7 @@ def decode_one(human, response, recorder=None):
         recorder.log_it(events)
         initial_text = human['parts'][0]['text']
         records = [dict(Human=initial_text), dict(machine=answer)]
-        recorder.record_many(records)
+        recorder.record_it(records)
     return answer
 
 
@@ -53,7 +53,7 @@ def decode_many(human, response, recorder=None):
         recorder.log_it(events)
         initial_text = human['parts'][0]['text']
         records = [dict(Human=initial_text), dict(machine=answers)]
-        recorder.record_many(records)
+        recorder.record_it(records)
     return answers[0]
 
 

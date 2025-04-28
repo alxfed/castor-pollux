@@ -77,12 +77,12 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         contents = recorder.log.copy()
 
     # Create a structure that the idiots want.
-    human = dict(role='user', parts=[dict(text=text)])
+    human_says = dict(role='user', parts=[dict(text=text)])
     if text and not contents:
-        contents = [human]
+        contents = [human_says]
         # contents = [{'parts': [{'text': text}], 'role': 'user'}]
     else:
-        contents.append(dict(role='user', parts=[dict(text=text)]))
+        contents.append(human_says)
         # {'parts': [{'text': text}], 'role': 'user'})
 
     json_data = {
@@ -96,7 +96,7 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
             'responseModalities':   kwargs.get('modalities',['TEXT']),
             'temperature':          kwargs.get('temperature', 0.5),
             'maxOutputTokens':      kwargs.get('max_tokens', 10000),
-            'candidateCount':       1, # kwargs.get('n', 1),  is in continuationS
+            'candidateCount':       kwargs.get('n', 1),  # is in continuationS
             'topP':                 kwargs.get('top_p', 0.9),
             'topK':                 kwargs.get('top_k', 10),
             'enableEnhancedCivicAnswers':   False,
@@ -115,9 +115,9 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         if response.status_code == requests.codes.ok:
             output = response.json()
             if len(output['candidates']) == 1:
-                answer = decode_one(human, output, recorder)
+                answer = decode_one(human_says, output, recorder)
             elif len(output['candidates']) > 1:
-                answer = decode_many(human, output, recorder)
+                answer = decode_many(human_says, output, recorder)
             else:
                 raise Exception('No candidates in response')
         else:
@@ -129,85 +129,6 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         return None
 
     return answer
-
-
-def continuations(text=None, contents=None, instruction=None, recorder=None, **kwargs):
-    """A completions endpoint call.
-        kwargs:
-            temperature     = 0 to 1.0
-            top_p           = 0.0 to 1.0
-            top_k           = The maximum number of tokens to consider when sampling.
-            n               = 1 is mandatory for this method continuationS have n > 1
-            max_tokens      = number of tokens
-            stop            = ['stop']  array of up to 4 sequences
-    """
-    instruction         = kwargs.get('system_instruction', instruction)
-    system_instruction  = dict(role='system', parts=[dict(text=instruction)]) if instruction else None
-
-    contents            = kwargs.get('contents', contents)
-
-    # if there is a recorded previous conversation
-    if recorder and not contents:
-        contents = recorder.log
-
-    # Create a structure that the idiots want.
-    if text and not contents:
-        contents = dict(role='user', parts=[dict(text=text)])
-        # contents = [{'parts': [{'text': text}], 'role': 'user'}]
-
-    else:
-        contents.append(dict(role='user', parts=[dict(text=text)]))
-        # {'parts': [{'text': text}], 'role': 'user'})
-
-    json_data = {
-        'systemInstruction':        system_instruction,
-        'contents':                 contents,
-        'safetySettings':           garbage,
-        'generationConfig':{
-            'stopSequences':        kwargs.get('stop_sequences', ['STOP','Title']),
-            'responseMimeType':     kwargs.get('mime_type','text/plain'),
-            # 'responseSchema': {},
-            'responseModalities':   kwargs.get('modalities',['TEXT']),
-            'temperature':          kwargs.get('temperature', 0.5),
-            'maxOutputTokens':      kwargs.get('max_tokens', 10000),
-            'candidateCount':       1, # kwargs.get('n', 1),  is in continuationS
-            'topP':                 kwargs.get('top_p', 0.9),
-            'topK':                 kwargs.get('top_k', 10),
-            'enableEnhancedCivicAnswers':   False,
-            'thinkingConfig':   {
-                'thinkingBudget':   kwargs.get('thinking', 0) # 24576
-            }
-            #'cachedContent': '',
-        },
-    }
-    try:
-        response = requests.post(
-            url=f'{gemini_api_base}/models/{kwargs.get("model", gemini_content_model)}:generateContent',
-            params=f'key={gemini_key}',
-            json=json_data,
-        )
-        if response.status_code == requests.codes.ok:
-            answer = response.json()
-            if answer.candidates[0]['content']['finishReason'] == 'SAFETY':
-                raise Exception('Results censored')
-            else:
-                # if recorder:
-                #     log_message = {'query': json_data, 'response': answer}
-                #     recorder.log_it(log_message)
-                ...
-        else:
-            print(f'Request status code: {response.status_code}')
-            return None
-        answers =[candidate['content']['parts'][0]['text'] for candidate in answer['candidates']]
-        if recorder:
-            rec = {'messages': json_data['contents'], 'response': answer['candidates']}
-            recorder.record(rec)
-
-    except Exception as e:
-        print(f'Unable to generate continuation of the text, {e}')
-        return None
-
-    return rec
 
 
 def embed(input_list, **kwargs):

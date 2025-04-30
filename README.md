@@ -36,7 +36,8 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5                         # 0 to 1.0
   top_k:        10                          # number of tokens to consider.
   top_p:        0.5                         # 0 to 1.0
-  thinking:     24576                       # max thinking tokens budget; 0 to prevent 'thinking'
+  thinking:     24576                       # max thinking tokens budget; 
+                                            # 0 to prevent 'thinking'
 """
 
 instruction = 'You are Joseph Jacobs, you retell folk tales.'
@@ -83,7 +84,8 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5                         # 0 to 1.0
   top_k:        10                          # number of tokens to consider.
   top_p:        0.5                         # 0 to 1.0
-  thinking:     24576                       # max thinking tokens budget; 0 to prevent 'thinking'
+  thinking:     24576                       # max thinking tokens budget; 
+                                            # 0 to prevent 'thinking'
 """
 
 previous_turns = """

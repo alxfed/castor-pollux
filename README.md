@@ -36,7 +36,7 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5                         # 0 to 1.0
   top_k:        10                          # number of tokens to consider.
   top_p:        0.5                         # 0 to 1.0
-  thinking:     24576                       # thinking tokens budget.
+  thinking:     24576                       # max thinking tokens budget; 0 to prevent 'thinking'
 """
 
 instruction = 'You are Joseph Jacobs, you retell folk tales.'
@@ -70,21 +70,30 @@ from yaml import safe_dump as yd
 from yaml import YAMLError as ERR
 
 kwargs = """  # this is a string in YAML format
-  model:        gemini-2.5-pro-exp-03-25
-  system:       Always answer concisely 
-  max_tokens:   5
-  stop_sequences:   
-    - stop          
-    - "\n\n\nHuman:"    
-  stream:       False 
+  model:        gemini-2.5-pro-exp-03-25    # thingking model
+  # system_instruction: ''                  # will prevail if put here
+  mime_type:    text/plain                  #
+  modalities:
+    - TEXT                                  # text for text
+  max_tokens:   10000
+  n:            1                           # 1 is not mandatory
+  stop_sequences:
+    - STOP
+    - "\nTitle"
+  temperature:  0.5                         # 0 to 1.0
+  top_k:        10                          # number of tokens to consider.
+  top_p:        0.5                         # 0 to 1.0
+  thinking:     24576                       # max thinking tokens budget; 0 to prevent 'thinking'
 """
 
 previous_turns = """
-  - role:   human  # not the idiotic 'user', God forbid.
-    text: Can we change human nature?
+  - role: user
+    parts:
+      - text: Can we change human nature?
     
-  - role:   machine # not the idiotic 'model'
-    text: Of course, nothing can be simpler. You just re-educate them.
+  - role: model
+    parts:
+      - text: Of course, nothing can be simpler. You just re-educate them.
 """
 
 human_response_to_the_previous_turn = 'That is not true. Think again.'
@@ -98,7 +107,7 @@ machine_responses = cp.continuation(
     **yl(kwargs)
 )
 
-file_name = 'yaml_test.yaml'
+file_name = 'machine_texts.yaml'
 with open(file_name, "w") as stream:
     try:
         yd(machine_responses, stream)
@@ -111,3 +120,40 @@ with open(file_name, 'r') as stream:
     except ERR as exc:
         print(exc)
 ``` 
+## Recorder, logs and records and multi-turn conversations
+`castor-pollux` can work with `grammateus` recorder if you pass an initialized instance of it in your calls.
+```python
+from yaml import safe_load as yl
+from grammateus import Grammateus
+from castor_pollux import rest as cp
+
+location = '/home/<user>/Documents/Fairytales/one/'
+recorder = Grammateus(location)    # https://pypi.org/project/grammateus/
+
+kwargs = """  # this is a string in YAML format
+  model:        gemini-2.5-flash-preview-04-17
+  mime_type:    text/plain
+  modalities:
+    - TEXT
+  max_tokens:   32000
+  n:            1  # no longer a mandatory 1
+  stop_sequences:
+    - STOP
+    - "\nTitle"
+  temperature:  0.5
+  top_k:        10
+  top_p:        0.5
+  thinking:     24576  # thinking tokens budget. 24576
+"""
+
+instruction = 'I am Joseph Jacobs. I retell folk tales'
+
+text_to_continue = 'Once upon a time, when pigs drank wine'
+
+machine_text = cp.continuation(
+    text=text_to_continue,
+    instruction=instruction,
+    recorder=recorder,
+    **yl(kwargs)
+)
+```

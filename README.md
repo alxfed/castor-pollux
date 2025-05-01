@@ -19,8 +19,6 @@ Then:
 ```Python
 import castor_pollux.rest as cp
 from yaml import safe_load as yl
-from yaml import safe_dump as yd
-from yaml import YAMLError as ERR
 
 kwargs = """  # this is a string in YAML format
   model:        gemini-2.5-pro-exp-03-25    # thingking model
@@ -49,26 +47,11 @@ machine_responses = cp.continuation(
     instruction=instruction,
     **yl(kwargs)
 )
-
-file_name = 'yaml_test.yaml'
-with open(file_name, "w") as stream:
-    try:
-        yd(machine_responses, stream)
-    except ERR as exc:
-        print(exc)
-# texts = yd(machine_responses)
-with open(file_name, 'r') as stream:
-    try:
-        texts = yl(stream)
-    except ERR as exc:
-        print(exc)
 ```
 ## A multi-turn conversation continuation request:
 ```Python
 import castor_pollux.rest as cp
 from yaml import safe_load as yl
-from yaml import safe_dump as yd
-from yaml import YAMLError as ERR
 
 kwargs = """  # this is a string in YAML format
   model:        gemini-2.5-pro-exp-03-25    # thingking model
@@ -108,21 +91,8 @@ machine_responses = cp.continuation(
     instruction=instruction,
     **yl(kwargs)
 )
-
-file_name = 'machine_texts.yaml'
-with open(file_name, "w") as stream:
-    try:
-        yd(machine_responses, stream)
-    except ERR as exc:
-        print(exc)
-# texts = yd(machine_responses)
-with open(file_name, 'r') as stream:
-    try:
-        texts = yl(stream)
-    except ERR as exc:
-        print(exc)
 ``` 
-## Recorder, logs and records and multi-turn conversations
+## Recorder, logs, records and multi-turn conversations
 `castor-pollux` can work with `grammateus` recorder if you pass an initialized instance of it in your calls.
 ```python
 from yaml import safe_load as yl

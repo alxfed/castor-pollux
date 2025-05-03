@@ -94,13 +94,12 @@ machine_responses = cp.continuation(
 ``` 
 ## Recorder, logs, records and multi-turn conversations
 `castor-pollux` can work with `grammateus` recorder if you pass an initialized instance of it in your calls.
-```python
+```Python
 from yaml import safe_load as yl
 from grammateus import Grammateus
 from castor_pollux import rest as cp
 
-location = '/home/<user>/Documents/Fairytales/one/'
-recorder = Grammateus(location)    # https://pypi.org/project/grammateus/
+records = '/home/<user>/Documents/Fairytales/'
 
 kwargs = """  # this is a string in YAML format
   model:        gemini-2.5-flash-preview-04-17
@@ -125,7 +124,7 @@ text_to_continue = 'Once upon a time, when pigs drank wine'
 machine_text = cp.continuation(
     text=text_to_continue,
     instruction=instruction,
-    recorder=recorder,
+    recorder=Grammateus(records),    # https://pypi.org/project/grammateus/
     **yl(kwargs)
 )
 ```

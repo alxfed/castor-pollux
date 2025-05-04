@@ -45,7 +45,7 @@ def decode(human_says, output, recorder=None):
         raise Exception('No candidates in response')
 
 
-def encoder(records):
+def encode(records):
     log = []
     for record in records:
         keys = record.keys()

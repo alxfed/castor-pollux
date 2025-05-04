@@ -7,6 +7,7 @@ LICENSE file in the root directory of this source tree.
 """
 from os import environ
 import requests
+from .adapter import decode
 
 
 gemini_key              = environ.get('GOOGLE_API_KEY','') # GEMINI_KEY', '')
@@ -22,43 +23,43 @@ garbage = [
     {'category':'HARM_CATEGORY_CIVIC_INTEGRITY', 'threshold': 'BLOCK_NONE'}
 ]
 
-
-def decode_one(human_said, response, recorder=None):
-    if response['candidates'][0]['finishReason'] == 'SAFETY':
-        raise Exception('Answer censored by Google.')
-    answer = response['candidates'][0]['content']['parts'][0]['text']
-    if recorder:
-        machine_answered = dict(role='model', parts=[dict(text=answer)])
-        events = [human_said, machine_answered]
-        recorder.log_it(events)
-        initial_text = human_said['parts'][0]['text']
-        records = [dict(Human=initial_text), dict(machine=answer)]
-        recorder.record_it(records)
-    return answer
-
-
-def decode_many(human_said, response, recorder=None):
-    candidates = response['candidates']
-    answers = []
-    for candidate in candidates:
-        if candidate['finishReason'] == 'SAFETY':
-            text = 'Answer censored by Google.'
-        else:
-            text = candidate['content']['parts'][0]['text']
-        answers.append(text)
-    if recorder:
-        # only the first answer is logged (because of continuations)
-        # make your own logger if you will be choosing after every turn;
-        # I edit records manually and overwrite log with the help of Scribe
-        # see the Grammateus package.
-        machine_answer = dict(role='model', parts=[dict(text=answers[0])])
-        events = [human_said, machine_answer]
-        recorder.log_it(events)
-        initial_text = human_said['parts'][0]['text']
-        records = [dict(Human=initial_text), dict(machine=answers)]
-        recorder.record_it(records)
-    return answers
-
+#
+# def decode_one(human_said, response, recorder=None):
+#     if response['candidates'][0]['finishReason'] == 'SAFETY':
+#         raise Exception('Answer censored by Google.')
+#     answer = response['candidates'][0]['content']['parts'][0]['text']
+#     if recorder:
+#         machine_answered = dict(role='model', parts=[dict(text=answer)])
+#         events = [human_said, machine_answered]
+#         recorder.log_it(events)
+#         initial_text = human_said['parts'][0]['text']
+#         records = [dict(Human=initial_text), dict(machine=answer)]
+#         recorder.record_it(records)
+#     return answer
+#
+#
+# def decode_many(human_said, response, recorder=None):
+#     candidates = response['candidates']
+#     answers = []
+#     for candidate in candidates:
+#         if candidate['finishReason'] == 'SAFETY':
+#             text = 'Answer censored by Google.'
+#         else:
+#             text = candidate['content']['parts'][0]['text']
+#         answers.append(text)
+#     if recorder:
+#         # only the first answer is logged (because of continuations)
+#         # make your own logger if you will be choosing after every turn;
+#         # I edit records manually and overwrite log with the help of Scribe
+#         # see the Grammateus package.
+#         machine_answer = dict(role='model', parts=[dict(text=answers[0])])
+#         events = [human_said, machine_answer]
+#         recorder.log_it(events)
+#         initial_text = human_said['parts'][0]['text']
+#         records = [dict(Human=initial_text), dict(machine=answers)]
+#         recorder.record_it(records)
+#     return answers
+#
 
 def continuation(text=None, contents=None, instruction=None, recorder=None, **kwargs):
     """A continuation of text with a given context and instruction.
@@ -117,12 +118,13 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         )
         if response.status_code == requests.codes.ok:
             output = response.json()
-            if len(output['candidates']) == 1:
-                answer = decode_one(human_says, output, recorder)
-            elif len(output['candidates']) > 1:
-                answer = decode_many(human_says, output, recorder)
-            else:
-                raise Exception('No candidates in response')
+            # if len(output['candidates']) == 1:
+            #     answer = decode_one(human_says, output, recorder)
+            # elif len(output['candidates']) > 1:
+            #     answer = decode_many(human_says, output, recorder)
+            # else:
+            #     raise Exception('No candidates in response')
+            answer = decode(human_says, output, recorder)
         else:
             print(f'Request status code: {response.status_code}')
             return None

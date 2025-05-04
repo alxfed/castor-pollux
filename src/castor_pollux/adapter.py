@@ -48,7 +48,6 @@ def decode(human_says, output, recorder=None):
 def encode(records):
     log = []
     for record in records:
-        keys = record.keys()
         key = next(iter(record.keys()))
         if key == 'Human':
             user_said = dict(role='user', parts=[dict(text=record['Human'])])

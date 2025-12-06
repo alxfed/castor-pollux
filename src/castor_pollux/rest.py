@@ -7,12 +7,12 @@ LICENSE file in the root directory of this source tree.
 """
 from os import environ
 import requests
-from .adapter import decode
+from adapter import decode
 
 
 gemini_key              = environ.get('GOOGLE_API_KEY','') # GEMINI_KEY', '')
 gemini_api_base         = environ.get('GEMINI_API_BASE','https://generativelanguage.googleapis.com/v1beta')
-gemini_content_model    = environ.get('GEMINI_DEFAULT_CONTENT_MODEL', 'gemini-2.5-pro-exp-03-25')
+gemini_content_model    = environ.get('GEMINI_DEFAULT_CONTENT_MODEL', 'gemini-2.5-pro')
 gemini_embedding_model  = environ.get('GEMINI_DEFAULT_EMBEDDING_MODEL', 'text-embedding-004')
 
 garbage = [
@@ -55,6 +55,11 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
     json_data = {
         'systemInstruction':        system_instruction,
         'contents':                 contents,
+        'tools': [
+            # {
+            #     "file_search": {"file_search_store_names": ["store_name"]}
+            # }
+        ],
         'safetySettings':           garbage,
         'generationConfig':{
             'stopSequences':        kwargs.get('stop_sequences', ['STOP','Title']),
@@ -118,10 +123,32 @@ def embed(input_list, **kwargs):
         return embeddings_list
 
 
+def create_file_store(display_name, **kwargs):
+    """Returns the file search store dict.
+    """
+    store = {}
+    json_data = {'displayName': display_name} | kwargs
+    try:
+        response = requests.post(
+            f'{gemini_api_base}/fileSearchStores',
+            params=f'key={gemini_key}',
+            json=json_data,
+        )
+        if response.status_code == requests.codes.ok:
+            store = response.json()
+        else:
+            print(f'Request status code: {response.status_code}')
+        return store
+    except Exception as e:
+        print('Unable to generate a file store')
+        print(f'Exception: {e}')
+        return store
+
+
 if __name__ == '__main__':
-    '''
-    ['gemini-2.5-flash-preview-04-17', 'gemini-2.5-pro-exp-03-25', 'gemini-1.5-flash-latest',
-    'gemini-2.0-flash-lite','gemini-2.0-flash','gemini-2.0-pro-exp-02-05',
-    'gemini-2.0-flash-thinking-exp-01-21']
-    '''
+    # name = 'Castor Pollux'
+    store_name = 'fileSearchStores/castor-pollux-nnfpl9z1b3iw'
+    # result = create_file_store(name)['name']
+
+
     ...

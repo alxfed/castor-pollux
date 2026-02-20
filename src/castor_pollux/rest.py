@@ -7,7 +7,7 @@ LICENSE file in the root directory of this source tree.
 """
 from os import environ
 import requests
-from .adapter import decode
+from .adapter import discern
 
 
 gemini_key              = environ.get('GOOGLE_API_KEY','') # GEMINI_KEY', '')
@@ -24,7 +24,7 @@ garbage = [
 ]
 
 
-def continuation(text=None, contents=None, instruction=None, recorder=None, **kwargs):
+def continuation(text=None, contents=None, instruction=None, **kwargs):
     """A continuation of text with a given context and instruction.
         kwargs:
             temperature     = 0 to 1.0
@@ -38,10 +38,6 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
     system_instruction  = dict(role='system', parts=[dict(text=instruction)]) if instruction else None
 
     contents            = kwargs.get('contents', contents)
-
-    # if there is a recorded previous conversation
-    if recorder and not contents:
-        contents = recorder.log.copy()
 
     # Create a structure that the idiots want.
     human_says = dict(role='user', parts=[dict(text=text)])
@@ -57,12 +53,12 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
     model = kwargs.get("model", gemini_content_model)
     if model.startswith('gemini-2.5'):
         thinking_config = {
-            'includeThoughts': True,
+            'includeThoughts': kwargs.get('include_thoughts', True),
             'thinkingBudget': kwargs.get('thinking_budget', 0)
         }
     elif model.startswith('gemini-3'):
         thinking_config = {
-            'includeThoughts': True,
+            'includeThoughts': kwargs.get('include_thoughts', True),
             'thinkingLevel': kwargs.get('thinking_level', 'high')
         }
 
@@ -100,16 +96,16 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         )
         if response.status_code == requests.codes.ok:
             output = response.json()
-            answer = decode(human_says, output, recorder)
+            text, thoughts = discern(output)
         else:
             print(f'Request status code: {response.status_code}')
-            return None
+            return '', ''
 
     except Exception as e:
         print(f'Unable to generate continuation of the text, {e}')
-        return None
+        return '', ''
 
-    return answer
+    return text, thoughts
 
 
 def embed(input_list, **kwargs):

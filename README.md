@@ -54,21 +54,20 @@ import castor_pollux.rest as cp
 from yaml import safe_load as yl
 
 kwargs = """  # this is a string in YAML format
-  model:        gemini-3.1-pro-preview    # thingking model
-  # system_instruction: ''                  # will prevail if put here
-  mime_type:    text/plain                  #
+  model:        gemini-2.5-pro
+  mime_type:    text/plain
   modalities:
-    - TEXT                                  # text for text
-  max_tokens:   10000
-  n:            1                           # 1 is not mandatory
+    - TEXT
+  max_tokens:   32000
+  n:            1  # no longer a mandatory 1
   stop_sequences:
     - STOP
     - "\nTitle"
-  temperature:  0.5                         # 0 to 1.0
-  top_k:        10                          # number of tokens to consider.
-  top_p:        0.5                         # 0 to 1.0
+  temperature:  0.5
+  top_k:        10
+  top_p:        0.5
   include_thoughts: True
-  thinking_level: high                      # for 3+ models
+  thinking_budget: 32768   
 """
 
 previous_turns = """
@@ -92,40 +91,3 @@ machine_responses = cp.continuation(
     **yl(kwargs)
 )
 ``` 
-## Recorder, logs, records and multi-turn conversations
-`castor-pollux` can work with `grammateus` recorder if you pass an initialized instance of it in your calls.
-```Python
-from yaml import safe_load as yl
-from grammateus import Grammateus
-from castor_pollux import rest as cp
-
-records = '/home/<user>/Documents/Fairytales/'
-
-kwargs = """  # this is a string in YAML format
-  model:        gemini-2.5-pro
-  mime_type:    text/plain
-  modalities:
-    - TEXT
-  max_tokens:   32000
-  n:            1  # no longer a mandatory 1
-  stop_sequences:
-    - STOP
-    - "\nTitle"
-  temperature:  0.5
-  top_k:        10
-  top_p:        0.5
-  include_thoughts: True
-  thinking_budget: 32768                        # for 2.5 models
-"""
-
-instruction = 'I am Joseph Jacobs. I retell folk tales'
-
-text_to_continue = 'Once upon a time, when pigs drank wine'
-
-machine_text = cp.continuation(
-    text=text_to_continue,
-    instruction=instruction,
-    recorder=Grammateus(records),    # https://pypi.org/project/grammateus/
-    **yl(kwargs)
-)
-```

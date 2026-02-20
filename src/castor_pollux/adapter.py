@@ -13,7 +13,7 @@ def discern(output):
     if output['candidates'][0]['finishReason'] == 'SAFETY':
         raise Exception('Answer censored by Google.')
     for part in output['candidates'][0]['content']['parts']:
-        if part.get('thoughts'):
+        if part.get('thought'):
             thoughts += part['text']
         else:
             text += part['text']

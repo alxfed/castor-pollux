@@ -52,6 +52,20 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
         contents.append(human_says)
         # {'parts': [{'text': text}], 'role': 'user'})
 
+    # Trickery for thinking models
+    thinking_config = None
+    model = kwargs.get("model", gemini_content_model)
+    if model.startswith('gemini-2.5'):
+        thinking_config = {
+            'includeThoughts': True,
+            'thinkingBudget': kwargs.get('thinking_budget', 0)
+        }
+    elif model.startswith('gemini-3'):
+        thinking_config = {
+            'includeThoughts': True,
+            'thinkingLevel': kwargs.get('thinking_level', 'high')
+        }
+
     json_data = {
         'systemInstruction':        system_instruction,
         'contents':                 contents,
@@ -72,12 +86,12 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
             'topP':                 kwargs.get('top_p', 0.9),
             'topK':                 kwargs.get('top_k', 10),
             'enableEnhancedCivicAnswers':   False,
-            'thinkingConfig':   {
-                'thinkingLevel': 'high'
-            }
             #'cachedContent': '',
         },
     }
+    if thinking_config:
+        json_data['generationConfig']['thinkingConfig'] = thinking_config
+
     try:
         response = requests.post(
             url=f'{gemini_api_base}/models/{kwargs.get("model", gemini_content_model)}:generateContent',

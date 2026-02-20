@@ -21,7 +21,7 @@ import castor_pollux.rest as cp
 from yaml import safe_load as yl
 
 kwargs = """  # this is a string in YAML format
-  model:        gemini-2.5-pro-exp-03-25    # thingking model
+  model:        gemini-3.1-pro-preview      # thingking model
   # system_instruction: ''                  # will prevail if put here
   mime_type:    text/plain                  #
   modalities:
@@ -34,8 +34,8 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5                         # 0 to 1.0
   top_k:        10                          # number of tokens to consider.
   top_p:        0.5                         # 0 to 1.0
-  thinking:     24576                       # max thinking tokens budget; 
-                                            # 0 to prevent 'thinking'
+  include_thoughts: True
+  thinking_level: high                      # for 3+ models
 """
 
 instruction = 'You are Joseph Jacobs, you retell folk tales.'
@@ -54,7 +54,7 @@ import castor_pollux.rest as cp
 from yaml import safe_load as yl
 
 kwargs = """  # this is a string in YAML format
-  model:        gemini-2.5-pro-exp-03-25    # thingking model
+  model:        gemini-3.1-pro-preview    # thingking model
   # system_instruction: ''                  # will prevail if put here
   mime_type:    text/plain                  #
   modalities:
@@ -67,8 +67,8 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5                         # 0 to 1.0
   top_k:        10                          # number of tokens to consider.
   top_p:        0.5                         # 0 to 1.0
-  thinking:     24576                       # max thinking tokens budget; 
-                                            # 0 to prevent 'thinking'
+  include_thoughts: True
+  thinking_level: high                      # for 3+ models
 """
 
 previous_turns = """
@@ -102,7 +102,7 @@ from castor_pollux import rest as cp
 records = '/home/<user>/Documents/Fairytales/'
 
 kwargs = """  # this is a string in YAML format
-  model:        gemini-2.5-flash-preview-04-17
+  model:        gemini-2.5-pro
   mime_type:    text/plain
   modalities:
     - TEXT
@@ -114,7 +114,8 @@ kwargs = """  # this is a string in YAML format
   temperature:  0.5
   top_k:        10
   top_p:        0.5
-  thinking:     24576  # thinking tokens budget. 24576
+  include_thoughts: True
+  thinking_budget: 32768                        # for 2.5 models
 """
 
 instruction = 'I am Joseph Jacobs. I retell folk tales'

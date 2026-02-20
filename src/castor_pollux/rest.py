@@ -73,7 +73,7 @@ def continuation(text=None, contents=None, instruction=None, recorder=None, **kw
             'topK':                 kwargs.get('top_k', 10),
             'enableEnhancedCivicAnswers':   False,
             'thinkingConfig':   {
-                'thinkingBudget':   kwargs.get('thinking', 0) # 24576
+                'thinkingLevel': 'high'
             }
             #'cachedContent': '',
         },

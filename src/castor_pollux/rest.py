@@ -7,7 +7,7 @@ LICENSE file in the root directory of this source tree.
 """
 from os import environ
 import requests
-from adapter import decode
+from .adapter import decode
 
 
 gemini_key              = environ.get('GOOGLE_API_KEY','') # GEMINI_KEY', '')

@@ -49,7 +49,7 @@ machine_responses = cp.continuation(
     **yl(kwargs)
 )
 ```
-## A continuation with sources:
+## A multi-turn continuation:
 
 ```Python
 import castor_pollux.rest as cp
@@ -70,11 +70,9 @@ kwargs = """  # this is a string in YAML format
   top_p:        0.5
   include_thoughts: True
   thinking_budget: 32768
-  sources:
-    - https://github.com/machina-ratiocinatrix
-    - https://github.com/alxfed
 """
 
+# No f...ing 'parts'!
 previous_turns = """
   - role: user
     content: Can we change human nature?

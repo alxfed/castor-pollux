@@ -39,11 +39,6 @@ def continuation(messages=None, instructions=None, **kwargs):
 
     contents            = messages_to_mpj(kwargs.get('messages', messages))
 
-    # Sources
-    urls = None
-    if kwargs.get("sources"):
-        urls = kwargs.get("sources")
-
     # Trickery for thinking models
     thinking_config = None
     model = kwargs.get("model", gemini_content_model)
@@ -88,17 +83,10 @@ def continuation(messages=None, instructions=None, **kwargs):
     }
     if thinking_config:
         json_data['generationConfig']['thinkingConfig'] = thinking_config
-    if urls:
+    if kwargs.get('sources'):
         json_data['tools'].append(
             {
-                "url_context": {
-                    "urls": urls
-                    # f.i.
-                    # [
-                    #     "https://github.com/absorbing-machine",
-                    #     "https://github.com/machina-ratiocinatrix"
-                    # ]
-                }
+                "url_context": {}
             }
         )
 

@@ -19,3 +19,13 @@ def discern(output):
             text += part['text']
 
     return text, thoughts
+
+
+def messages_to_mpj(messages):
+    contents = []
+    for message in messages:
+        if message['role'] == 'user':
+            obj = dict(role='user', parts=[dict(text=message['content'])])
+        elif message['role'] == 'assistant':
+            obj = dict(role='model', parts=[dict(text=message['content'])])
+    return contents

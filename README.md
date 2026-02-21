@@ -16,6 +16,7 @@ Then:
   import castor_pollux.rest as cp
 ```
 ## A text continuation request:
+
 ```Python
 import castor_pollux.rest as cp
 from yaml import safe_load as yl
@@ -40,15 +41,16 @@ kwargs = """  # this is a string in YAML format
 
 instruction = 'You are Joseph Jacobs, you retell folk tales.'
 
-text_to_continue = 'Once upon a time, when pigs drank wine '
+message = [{"role": "user", "content": 'Once upon a time, when pigs drank wine '}]
 
 machine_responses = cp.continuation(
-    text=text_to_continue,
-    instruction=instruction,
+    messages=message,
+    instructions=instruction,
     **yl(kwargs)
 )
 ```
-## A multi-turn conversation continuation request:
+## A continuation with sources:
+
 ```Python
 import castor_pollux.rest as cp
 from yaml import safe_load as yl
@@ -67,17 +69,18 @@ kwargs = """  # this is a string in YAML format
   top_k:        10
   top_p:        0.5
   include_thoughts: True
-  thinking_budget: 32768   
+  thinking_budget: 32768
+  sources:
+    - https://github.com/machina-ratiocinatrix
+    - https://github.com/alxfed
 """
 
 previous_turns = """
   - role: user
-    parts:
-      - text: Can we change human nature?
+    content: Can we change human nature?
     
   - role: model
-    parts:
-      - text: Of course, nothing can be simpler. You just re-educate them.
+    content: Of course, nothing can be simpler. You just re-educate them.
 """
 
 human_response_to_the_previous_turn = 'That is not true. Think again.'
@@ -85,9 +88,8 @@ human_response_to_the_previous_turn = 'That is not true. Think again.'
 instruction = 'I am an expert in critical thinking. I analyse.'
 
 machine_responses = cp.continuation(
-    text=human_response_to_the_previous_turn,
-    contents=yl(previous_turns),
-    instruction=instruction,
+    messages=yl(previous_turns),
+    instructions=instruction,
     **yl(kwargs)
 )
 ``` 

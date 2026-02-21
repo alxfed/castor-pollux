@@ -7,11 +7,11 @@ LICENSE file in the root directory of this source tree.
 """
 from os import environ
 import requests
-from .adapter import discern
+from .adapter import messages_to_mpj, discern
 
 
-gemini_key              = environ.get('GOOGLE_API_KEY','') # GEMINI_KEY', '')
-gemini_api_base         = environ.get('GEMINI_API_BASE','https://generativelanguage.googleapis.com/v1beta')
+gemini_key              = environ.get('GEMINI_API_KEY', '')
+gemini_api_base         = environ.get('GEMINI_API_BASE', 'https://generativelanguage.googleapis.com/v1beta')
 gemini_content_model    = environ.get('GEMINI_DEFAULT_CONTENT_MODEL', 'gemini-2.5-pro')
 gemini_embedding_model  = environ.get('GEMINI_DEFAULT_EMBEDDING_MODEL', 'text-embedding-004')
 
@@ -24,7 +24,7 @@ garbage = [
 ]
 
 
-def continuation(text=None, contents=None, instruction=None, **kwargs):
+def continuation(messages=None, instructions=None, **kwargs):
     """A continuation of text with a given context and instruction.
         kwargs:
             temperature     = 0 to 1.0
@@ -34,19 +34,15 @@ def continuation(text=None, contents=None, instruction=None, **kwargs):
             max_tokens      = number of tokens
             stop            = ['stop']  array of up to 4 sequences
     """
-    instruction         = kwargs.get('system_instruction', instruction)
-    system_instruction  = dict(role='system', parts=[dict(text=instruction)]) if instruction else None
+    instructions         = kwargs.get('system_instruction', instructions)
+    system_instruction  = dict(role='system', parts=[dict(text=instructions)]) if instructions else None
 
-    contents            = kwargs.get('contents', contents)
+    contents            = messages_to_mpj(kwargs.get('messages', messages))
 
-    # Create a structure that the idiots want.
-    human_says = dict(role='user', parts=[dict(text=text)])
-    if text and not contents:
-        contents = [human_says]
-        # contents = [{'parts': [{'text': text}], 'role': 'user'}]
-    else:
-        contents.append(human_says)
-        # {'parts': [{'text': text}], 'role': 'user'})
+    # Sources
+    urls = None
+    if kwargs.get("sources"):
+        urls = kwargs.get("sources")
 
     # Trickery for thinking models
     thinking_config = None
@@ -62,14 +58,19 @@ def continuation(text=None, contents=None, instruction=None, **kwargs):
             'thinkingLevel': kwargs.get('thinking_level', 'high')
         }
 
+    # Final payload
     json_data = {
         'systemInstruction':        system_instruction,
         'contents':                 contents,
-        'tools': [
-            # {
-            #     "file_search": {"file_search_store_names": ["store_name"]}
-            # }
-        ],
+        'tools':                    kwargs.get('tools', []),
+        #     [
+        #     # {
+        #     #     "file_search": {"file_search_store_names": ["store_name"]}
+        #     # },
+        #     # {
+        #           "url_context": {"urls": ["https://..., "https://..."]}
+        #     # }
+        # ],
         'safetySettings':           garbage,
         'generationConfig':{
             'stopSequences':        kwargs.get('stop_sequences', ['STOP','Title']),
@@ -87,7 +88,21 @@ def continuation(text=None, contents=None, instruction=None, **kwargs):
     }
     if thinking_config:
         json_data['generationConfig']['thinkingConfig'] = thinking_config
+    if urls:
+        json_data['tools'].append(
+            {
+                "url_context": {
+                    "urls": urls
+                    # f.i.
+                    # [
+                    #     "https://github.com/absorbing-machine",
+                    #     "https://github.com/machina-ratiocinatrix"
+                    # ]
+                }
+            }
+        )
 
+    # Now we can try
     try:
         response = requests.post(
             url=f'{gemini_api_base}/models/{kwargs.get("model", gemini_content_model)}:generateContent',
@@ -157,8 +172,4 @@ def create_file_store(display_name, **kwargs):
 
 if __name__ == '__main__':
     # name = 'Castor Pollux'
-    store_name = 'fileSearchStores/castor-pollux-nnfpl9z1b3iw'
-    # result = create_file_store(name)['name']
-
-
     ...

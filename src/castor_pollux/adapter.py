@@ -28,4 +28,7 @@ def messages_to_mpj(messages):
             obj = dict(role='user', parts=[dict(text=message['content'])])
         elif message['role'] == 'assistant':
             obj = dict(role='model', parts=[dict(text=message['content'])])
+        else:
+            obj = {}
+        contents.append(obj)
     return contents

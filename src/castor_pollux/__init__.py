@@ -5,10 +5,10 @@
 This source code is licensed under the license found in the
 LICENSE file in the root directory of this source tree.
 """
-from .rest import continuation
+from .rest import respond
 from .adapter import discern
 
 __all__ = [
-    'continuation',
+    'respond',
     'discern'
 ]

@@ -24,7 +24,7 @@ garbage = [
 ]
 
 
-def continuation(messages=None, instructions=None, **kwargs):
+def respond(messages=None, instructions=None, **kwargs):
     """A continuation of text with a given context and instruction.
         kwargs:
             temperature     = 0 to 1.0
@@ -63,7 +63,7 @@ def continuation(messages=None, instructions=None, **kwargs):
         #     #     "file_search": {"file_search_store_names": ["store_name"]}
         #     # },
         #     # {
-        #           "url_context": {"urls": ["https://..., "https://..."]}
+        #           "url_context": {}
         #     # }
         # ],
         'safetySettings':           garbage,
@@ -99,7 +99,7 @@ def continuation(messages=None, instructions=None, **kwargs):
         )
         if response.status_code == requests.codes.ok:
             output = response.json()
-            text, thoughts = discern(output)
+            thoughts, text = discern(output)
         else:
             print(f'Request status code: {response.status_code}')
             return '', ''
@@ -108,7 +108,7 @@ def continuation(messages=None, instructions=None, **kwargs):
         print(f'Unable to generate continuation of the text, {e}')
         return '', ''
 
-    return text, thoughts
+    return thoughts, text
 
 
 def embed(input_list, **kwargs):
@@ -136,6 +136,31 @@ def embed(input_list, **kwargs):
         return embeddings_list
 
 
+def models_list(**kwargs):
+    """Returns the list of models.
+    """
+    list_of_models = []
+    try:
+        response = requests.get(
+            f'{gemini_api_base}/models',
+            params=f'key={gemini_key}'
+        )
+        if response.status_code == requests.codes.ok:
+            mlist = response.json()['models']
+            # content = rjson['content']
+            # mlist = content['models']
+            for count, model in enumerate(mlist):
+                item = {'index': count, 'embedding': model}
+                list_of_models.append(item)
+        else:
+            print(f'Request status code: {response.status_code}')
+        return list_of_models
+    except Exception as e:
+        print('Unable to generate Embeddings response')
+        print(f'Exception: {e}')
+        return list_of_models
+
+
 def create_file_store(display_name, **kwargs):
     """Returns the file search store dict.
     """
@@ -160,4 +185,5 @@ def create_file_store(display_name, **kwargs):
 
 if __name__ == '__main__':
     # name = 'Castor Pollux'
+    list = models_list()
     ...

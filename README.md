@@ -37,6 +37,7 @@ kwargs = """  # this is a string in YAML format
   top_p:        0.5                         # 0 to 1.0
   include_thoughts: True
   thinking_level: high                      # for 3+ models
+  sources: True                             # add url_context tool
 """
 
 instruction = 'You are Joseph Jacobs, you retell folk tales.'
